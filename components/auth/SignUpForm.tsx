@@ -1,7 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { AuthForm } from './AuthForm'
+import dynamic from 'next/dynamic'
+
+const AuthForm = dynamic(() => import('./AuthForm').then(mod => mod.AuthForm), {
+  ssr: false,
+  loading: () => <p>Loading form...</p> // Optional loading component
+})
 
 export function SignUpForm() {
   return (
