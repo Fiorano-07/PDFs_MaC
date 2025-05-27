@@ -3,9 +3,16 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { cookies } from 'next/headers'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 
+type RouteContext = {
+  params: {
+    id: string;
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params, searchParams }: RouteContext
 ) {
   try {
     const { data: pdf, error } = await supabaseAdmin
@@ -22,7 +29,7 @@ export async function GET(
         created_at,
         updated_at
       `)
-      .eq('id', context.params.id)
+      .eq('id', params.id)
       .single()
 
     if (error) {
@@ -44,7 +51,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params, searchParams }: RouteContext
 ) {
   try {
     const supabase = createServerComponentClient({ cookies })
@@ -65,7 +72,7 @@ export async function PATCH(
     const { data: existingPdf, error: fetchError } = await supabaseAdmin
       .from('pdf_files')
       .select('owner_id')
-      .eq('id', context.params.id)
+      .eq('id', params.id)
       .single()
 
     if (fetchError || !existingPdf) {
@@ -83,7 +90,7 @@ export async function PATCH(
         is_public,
         updated_at: new Date().toISOString()
       })
-      .eq('id', context.params.id)
+      .eq('id', params.id)
       .select()
       .single()
 
@@ -102,7 +109,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params, searchParams }: RouteContext
 ) {
   try {
     const supabase = createServerComponentClient({ cookies })
@@ -121,7 +128,7 @@ export async function DELETE(
     const { data: pdf, error: fetchError } = await supabaseAdmin
       .from('pdf_files')
       .select('owner_id, file_path')
-      .eq('id', context.params.id)
+      .eq('id', params.id)
       .single()
 
     if (fetchError || !pdf) {
@@ -146,7 +153,7 @@ export async function DELETE(
     const { error: dbError } = await supabaseAdmin
       .from('pdf_files')
       .delete()
-      .eq('id', context.params.id)
+      .eq('id', params.id)
 
     if (dbError) {
       return NextResponse.json({ error: dbError.message }, { status: 500 })
