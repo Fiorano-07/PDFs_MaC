@@ -4,13 +4,9 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { cookies } from 'next/headers'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 
-interface RequestContext {
-  params: { id: string }
-}
-
 export async function GET(
-  req: NextRequest,
-  context: RequestContext
+  request: NextRequest,
+  context: { params: { id: string } }
 ) {
   try {
     const { data: pdf, error } = await supabaseAdmin
@@ -48,8 +44,8 @@ export async function GET(
 }
 
 export async function PATCH(
-  req: NextRequest,
-  context: RequestContext
+  request: NextRequest,
+  context: { params: { id: string } }
 ) {
   try {
     const supabase = createServerComponentClient({ cookies })
@@ -63,7 +59,7 @@ export async function PATCH(
     }
 
     const userId = session.user.id
-    const body = await req.json()
+    const body = await request.json()
     const { filename, is_public } = body
 
     // Verify ownership
@@ -106,8 +102,8 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  req: NextRequest,
-  context: RequestContext
+  request: NextRequest,
+  context: { params: { id: string } }
 ) {
   try {
     const supabase = createServerComponentClient({ cookies })
