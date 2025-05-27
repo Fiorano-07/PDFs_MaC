@@ -31,9 +31,7 @@ const mockComments = [
   },
 ]
 
-interface SharedPDFPageParams { token: string }
-
-const SharedPDFPage: NextPage<{ params: SharedPDFPageParams }> = ({ params }) => {
+export default function SharedPDFPage({ params }: { params: { token: string } }) {
   const [comments, setComments] = useState(mockComments)
   const [newComment, setNewComment] = useState("")
   const [guestName, setGuestName] = useState("")
@@ -221,5 +219,3 @@ const SharedPDFPage: NextPage<{ params: SharedPDFPageParams }> = ({ params }) =>
     </div>
   )
 }
-
-export default SharedPDFPage
