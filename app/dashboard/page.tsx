@@ -183,13 +183,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-black border-b border-gray-800">
+      <header className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-white">PDF Dashboard</h1>
+              <h1 className="text-2xl font-bold text-gray-900">PDF Dashboard</h1>
             </div>
 
             <div className="flex items-center space-x-4">
@@ -203,25 +203,25 @@ export default function DashboardPage() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full border border-gray-800 hover:bg-gray-900">
+                  <Button variant="outline" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="/placeholder-user.jpg" alt={user?.name || "User"} />
-                      <AvatarFallback className="bg-gray-900 text-white">
+                      <AvatarFallback className="bg-blue-100 text-blue-600">
                         {getInitials(user?.name || null)}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-gray-900 border border-gray-800" align="end" forceMount>
+                <DropdownMenuContent className="w-56 bg-white" align="end" forceMount>
                   <div className="flex flex-col space-y-1 p-2">
-                    <p className="text-sm font-medium text-white">{user?.name}</p>
-                    <p className="text-xs text-gray-400">{user?.email}</p>
+                    <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                    <p className="text-xs text-gray-500">{user?.email}</p>
                   </div>
-                  <DropdownMenuItem onClick={() => router.push('/profile')} className="text-white hover:bg-gray-800">
+                  <DropdownMenuItem onClick={() => router.push('/profile')} className="text-gray-700 hover:bg-gray-100">
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleSignOut} className="text-white hover:bg-gray-800">
+                  <DropdownMenuItem onClick={handleSignOut} className="text-gray-700 hover:bg-gray-100">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Sign out</span>
                   </DropdownMenuItem>
@@ -242,40 +242,40 @@ export default function DashboardPage() {
               placeholder="Search PDF files..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-gray-900 border-gray-800 text-white placeholder-gray-400 focus:border-blue-600"
+              className="pl-10 bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-blue-600"
             />
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-white border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Total Files</CardTitle>
-              <FileText className="h-4 w-4 text-blue-500" />
+              <CardTitle className="text-sm font-medium text-gray-900">Total Files</CardTitle>
+              <FileText className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{files.length}</div>
+              <div className="text-2xl font-bold text-gray-900">{files.length}</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-white border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Shared Files</CardTitle>
-              <Share2 className="h-4 w-4 text-blue-500" />
+              <CardTitle className="text-sm font-medium text-gray-900">Shared Files</CardTitle>
+              <Share2 className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{files.filter((f) => f.is_public).length}</div>
+              <div className="text-2xl font-bold text-gray-900">{files.filter((f) => f.is_public).length}</div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-800">
+          <Card className="bg-white border-gray-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">Total Views</CardTitle>
-              <MessageSquare className="h-4 w-4 text-blue-500" />
+              <CardTitle className="text-sm font-medium text-gray-900">Total Views</CardTitle>
+              <MessageSquare className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{files.reduce((sum, f) => sum + (f.view_count || 0), 0)}</div>
+              <div className="text-2xl font-bold text-gray-900">{files.reduce((sum, f) => sum + (f.view_count || 0), 0)}</div>
             </CardContent>
           </Card>
         </div>
@@ -283,38 +283,38 @@ export default function DashboardPage() {
         {/* Files Grid */}
         {isLoading ? (
           <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           </div>
         ) : filteredFiles.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredFiles.map((file) => (
-              <Card key={file.id} className="bg-gray-900 border-gray-800 hover:border-gray-700 transition-colors">
+              <Card key={file.id} className="bg-white border-gray-200 hover:border-gray-300 transition-colors">
                 <CardHeader className="flex flex-row items-start justify-between space-y-0">
                   <div className="flex-1">
-                    <CardTitle className="text-lg line-clamp-2 text-white">{file.title}</CardTitle>
-                    <CardDescription className="mt-2 text-gray-400">
+                    <CardTitle className="text-lg line-clamp-2 text-gray-900">{file.title}</CardTitle>
+                    <CardDescription className="mt-2 text-gray-500">
                       Uploaded on {new Date(file.created_at).toLocaleDateString()}
                     </CardDescription>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-800">
+                      <Button variant="ghost" className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-gray-900 border-gray-800" align="end">
-                      <DropdownMenuItem onClick={() => handleShare(file)} className="text-white hover:bg-gray-800">
+                    <DropdownMenuContent className="bg-white border-gray-200" align="end">
+                      <DropdownMenuItem onClick={() => handleShare(file)} className="text-gray-700 hover:bg-gray-100">
                         <Share2 className="mr-2 h-4 w-4" />
                         Share
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href={file.public_url} target="_blank" className="text-white hover:bg-gray-800">
+                        <Link href={file.public_url} target="_blank" className="text-gray-700 hover:bg-gray-100">
                           Download
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         onClick={() => handleDelete(file.id)}
-                        className="text-red-400 hover:bg-gray-800 hover:text-red-300"
+                        className="text-red-600 hover:bg-red-50"
                       >
                         Delete
                       </DropdownMenuItem>
@@ -324,15 +324,15 @@ export default function DashboardPage() {
 
                 <CardContent>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-400">{formatFileSize(file.size)}</span>
+                    <span className="text-sm text-gray-500">{formatFileSize(file.size)}</span>
                     <div className="flex items-center space-x-2">
                       {file.is_public && (
-                        <Badge variant="secondary" className="bg-blue-600/20 text-blue-400 border-blue-800">
+                        <Badge variant="secondary" className="bg-blue-50 text-blue-600 border-blue-200">
                           <Share2 className="h-3 w-3 mr-1" />
                           Shared
                         </Badge>
                       )}
-                      <Badge variant="outline" className="border-gray-700 text-gray-400">
+                      <Badge variant="outline" className="border-gray-200 text-gray-600">
                         <MessageSquare className="h-3 w-3 mr-1" />
                         {file.view_count || 0}
                       </Badge>
@@ -348,9 +348,9 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <FileText className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-white mb-2">No PDFs found</h3>
-            <p className="text-sm text-gray-400">
+            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No PDFs found</h3>
+            <p className="text-sm text-gray-500">
               {searchQuery
                 ? "No PDFs match your search criteria"
                 : "Upload your first PDF to get started"}
