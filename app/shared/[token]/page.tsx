@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Download, MessageSquare, Send } from "lucide-react"
+import type { NextPage } from 'next';
 
 // Mock data for shared PDF
 const mockComments = [
@@ -30,7 +31,9 @@ const mockComments = [
   },
 ]
 
-export default function SharedPDFPage({ params }: { params: { token: string } }) {
+interface SharedPDFPageParams { token: string }
+
+const SharedPDFPage: NextPage<{ params: SharedPDFPageParams }> = ({ params }) => {
   const [comments, setComments] = useState(mockComments)
   const [newComment, setNewComment] = useState("")
   const [guestName, setGuestName] = useState("")
@@ -218,3 +221,5 @@ export default function SharedPDFPage({ params }: { params: { token: string } })
     </div>
   )
 }
+
+export default SharedPDFPage
