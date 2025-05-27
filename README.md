@@ -1,30 +1,91 @@
-# React application requirements
+# PDF Manage & Collab
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+A modern web application for managing and collaborating on PDF documents, built with Next.js 15 and Supabase.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/shubhamx02025-4114s-projects/v0-react-application-requirements)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/UyQ8vWqomrt)
+## Features
 
-## Overview
+- 📄 PDF Document Management
+- 👥 Real-time Collaboration
+- 🔍 Advanced PDF Viewing and Navigation
+- 💾 Secure Document Storage
+- 🎨 Modern UI with Tailwind CSS
+- 🔐 Authentication and Authorization
+- 📱 Responsive Design
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+## Tech Stack
 
-## Deployment
+- **Frontend Framework**: Next.js 15
+- **Authentication & Database**: Supabase
+- **Styling**: Tailwind CSS
+- **UI Components**: Radix UI
+- **PDF Processing**: react-pdf, pdfjs-dist
+- **Form Handling**: React Hook Form with Zod validation
+- **State Management**: React Hooks
+- **Package Manager**: pnpm
 
-Your project is live at:
+## Prerequisites
 
-**[https://vercel.com/shubhamx02025-4114s-projects/v0-react-application-requirements](https://vercel.com/shubhamx02025-4114s-projects/v0-react-application-requirements)**
+Before you begin, ensure you have the following installed:
+- Node.js (v18 or higher)
+- pnpm (v10 or higher)
+- A Supabase account and project
 
-## Build your app
+## Getting Started
 
-Continue building your app on:
+1. Clone the repository:
+```bash
+git clone [your-repository-url]
+cd PDFs_MaC
+```
 
-**[https://v0.dev/chat/projects/UyQ8vWqomrt](https://v0.dev/chat/projects/UyQ8vWqomrt)**
+2. Install dependencies:
+```bash
+pnpm install
+```
 
-## How It Works
+3. Set up environment variables:
+Create a `.env.local` file in the root directory and add your Supabase credentials:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+4. Run the development server:
+```bash
+pnpm dev
+```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+
+## Project Structure
+
+```
+PDFs_MaC/
+├── app/           # Next.js app directory
+├── components/    # Reusable UI components
+├── hooks/         # Custom React hooks
+├── lib/          # Utility functions and configurations
+├── public/        # Static assets
+├── styles/       # Global styles and Tailwind CSS config
+└── supabase/     # Supabase related configurations
+```
+
+## Database Schema
+
+The application uses Supabase as its backend. The database schema can be found in `db_schema.sql`.
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support, please open an issue in the GitHub repository or contact the maintainers.
