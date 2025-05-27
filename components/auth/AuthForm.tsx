@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/components/ui/use-toast'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClientComponentClient, SupabaseClient } from '@supabase/auth-helpers-nextjs'
 
 interface AuthFormProps {
   mode: 'signin' | 'signup'
@@ -16,29 +16,37 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirectTo') || '/dashboard'
-  const supabase = createClientComponentClient()
+  // Defer searchParams and supabase client to useEffect
+  const [redirectTo, setRedirectTo] = useState('/dashboard')
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null)
+  const searchParams = useSearchParams() // Can be called at top level, but its usage should be in useEffect or event handlers if it affects SSR/prerender
 
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '', // Only used for signup
-  })
-
-  // Check for existing session on mount
   useEffect(() => {
+    // Initialize Supabase client on mount
+    const client = createClientComponentClient()
+    setSupabase(client)
+
+    // Get redirectTo from searchParams on mount
+    const redirectParam = searchParams?.get('redirectTo')
+    if (redirectParam) {
+      setRedirectTo(redirectParam)
+    }
+
+    // Check for existing session on mount, only if supabase client is initialized
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      if (!client) return; // Ensure client is available
+      const { data: { session } } = await client.auth.getSession()
       if (session) {
         console.log('Existing session found, redirecting...')
-        router.push(redirectTo)
+        router.push(redirectParam || '/dashboard') // Use redirectParam or default
       }
     }
     checkSession()
-  }, [router, supabase.auth, redirectTo])
+  // Add searchParams to dependency array if its value can change and affect this effect
+  }, [router, searchParams])
 
   const verifySession = async (maxAttempts = 5, delayMs = 1000): Promise<boolean> => {
+    if (!supabase) return false; // Ensure supabase client is available
     for (let i = 0; i < maxAttempts; i++) {
       console.log(`Attempt ${i + 1} to verify session...`)
       
@@ -54,10 +62,9 @@ export function AuthForm({ mode }: AuthFormProps) {
       
       if (error) {
         console.error(`Attempt ${i + 1} session verification error:`, error)
-        // Continue trying despite errors
       }
       
-      if (i < maxAttempts - 1) { // Don't wait on the last attempt
+      if (i < maxAttempts - 1) {
         console.log(`No session found on attempt ${i + 1}, waiting ${delayMs}ms...`)
         await new Promise(resolve => setTimeout(resolve, delayMs))
       }
@@ -67,12 +74,15 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!supabase) { // Ensure supabase client is available
+      toast({ title: 'Error', description: 'Supabase client not initialized.', variant: 'destructive' })
+      return
+    }
     setIsLoading(true)
 
     try {
       console.log('Attempting to sign in...')
       
-      // Try to sign in directly with Supabase client
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
@@ -88,7 +98,6 @@ export function AuthForm({ mode }: AuthFormProps) {
         throw new Error('No session returned from Supabase')
       }
 
-      // Now verify the session is established
       console.log('Verifying session establishment...')
       const sessionEstablished = await verifySession()
       
@@ -97,7 +106,6 @@ export function AuthForm({ mode }: AuthFormProps) {
         throw new Error('Failed to establish session. Please try signing in again.')
       }
 
-      // Only show success toast and redirect if we have a verified session
       toast({
         title: 'Success!',
         description: 'Successfully signed in',
@@ -105,7 +113,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       
       console.log('Session verified, redirecting to:', redirectTo)
       router.push(redirectTo)
-      router.refresh()
+      router.refresh() // Consider if this is needed immediately after push
 
     } catch (error) {
       console.error('Auth error:', error)
@@ -119,11 +127,22 @@ export function AuthForm({ mode }: AuthFormProps) {
     }
   }
 
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '', // Only used for signup
+  })
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }))
+  }
+
+  // Render form only after supabase client is initialized to avoid issues with handlers
+  if (!supabase) {
+    return <div>Loading...</div>; // Or some other loading indicator
   }
 
   return (
