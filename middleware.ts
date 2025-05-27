@@ -35,7 +35,9 @@ export async function middleware(req: NextRequest) {
 
     // Handle auth pages when user is already authenticated
     if (isAuthPage && session) {
-      return NextResponse.redirect(new URL('/dashboard', req.url))
+      // Get the intended redirect URL or default to dashboard
+      const redirectTo = req.nextUrl.searchParams.get('redirectTo') || '/dashboard'
+      return NextResponse.redirect(new URL(redirectTo, req.url))
     }
 
     return res

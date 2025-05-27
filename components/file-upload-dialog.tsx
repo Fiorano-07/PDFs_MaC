@@ -13,9 +13,10 @@ import { useRouter } from "next/navigation"
 interface FileUploadDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onUploadComplete?: () => Promise<void>
 }
 
-export function FileUploadDialog({ open, onOpenChange }: FileUploadDialogProps) {
+export function FileUploadDialog({ open, onOpenChange, onUploadComplete }: FileUploadDialogProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -104,8 +105,10 @@ export function FileUploadDialog({ open, onOpenChange }: FileUploadDialogProps) 
         description: "PDF uploaded successfully!",
       })
 
-      // Refresh the dashboard to show the new file
-      router.refresh()
+      // Call the onUploadComplete callback if provided
+      if (onUploadComplete) {
+        await onUploadComplete()
+      }
       
       // Close the dialog
       setSelectedFile(null)
@@ -130,16 +133,16 @@ export function FileUploadDialog({ open, onOpenChange }: FileUploadDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white">
         <DialogHeader>
-          <DialogTitle>Upload PDF</DialogTitle>
-          <DialogDescription>Select a PDF file to upload to your document library</DialogDescription>
+          <DialogTitle className="text-gray-900">Upload PDF</DialogTitle>
+          <DialogDescription className="text-gray-500">Select a PDF file to upload to your document library</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {!selectedFile ? (
             <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center"
+              className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-blue-500 transition-colors"
               onDrop={handleDrop}
               onDragOver={handleDragOver}
             >
@@ -160,22 +163,22 @@ export function FileUploadDialog({ open, onOpenChange }: FileUploadDialogProps) 
               </div>
             </div>
           ) : (
-            <div className="border border-gray-200 rounded-lg p-4">
+            <div className="border border-gray-200 rounded-lg p-4 bg-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <FileText className="h-8 w-8 text-red-600" />
+                  <FileText className="h-8 w-8 text-blue-600" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
                     <p className="text-xs text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                   </div>
                 </div>
-                <Button variant="ghost" size="sm" onClick={handleRemoveFile} disabled={isUploading}>
+                <Button variant="ghost" size="sm" onClick={handleRemoveFile} disabled={isUploading} className="text-gray-500 hover:text-gray-700">
                   <X className="h-4 w-4" />
                 </Button>
               </div>
               {isUploading && (
                 <div className="mt-2">
-                  <div className="h-2 bg-gray-200 rounded-full">
+                  <div className="h-2 bg-gray-100 rounded-full">
                     <div
                       className="h-2 bg-blue-600 rounded-full transition-all duration-300"
                       style={{ width: `${uploadProgress}%` }}
@@ -187,10 +190,19 @@ export function FileUploadDialog({ open, onOpenChange }: FileUploadDialogProps) 
           )}
 
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isUploading}>
+            <Button 
+              variant="outline" 
+              onClick={() => onOpenChange(false)} 
+              disabled={isUploading}
+              className="text-gray-700 hover:bg-gray-50"
+            >
               Cancel
             </Button>
-            <Button onClick={handleUpload} disabled={!selectedFile || isUploading}>
+            <Button 
+              onClick={handleUpload} 
+              disabled={!selectedFile || isUploading}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
               {isUploading ? "Uploading..." : "Upload"}
             </Button>
           </div>
