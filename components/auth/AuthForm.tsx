@@ -32,16 +32,18 @@ export function AuthForm({ mode }: AuthFormProps) {
       setRedirectTo(redirectParam)
     }
 
-    // Check for existing session on mount, only if supabase client is initialized
+    // TEMPORARILY COMMENT OUT FOR TESTING
+    /*
     const checkSession = async () => {
-      if (!client) return; // Ensure client is available
+      if (!client) return;
       const { data: { session } } = await client.auth.getSession()
       if (session) {
         console.log('Existing session found, redirecting...')
-        router.push(redirectParam || '/dashboard') // Use redirectParam or default
+        router.push(redirectParam || '/dashboard')
       }
     }
     checkSession()
+    */
   // Add searchParams to dependency array if its value can change and affect this effect
   }, [router, searchParams])
 
