@@ -168,6 +168,9 @@ importers:
         specifier: ^3.24.1
         version: 3.24.1
     devDependencies:
+      '@netlify/plugin-nextjs':
+        specifier: ^5.11.2
+        version: 5.11.2
       '@types/node':
         specifier: ^22
         version: 22.0.0
@@ -410,6 +413,10 @@ packages:
   '@napi-rs/canvas@0.1.70':
     resolution: {integrity: sha512-nD6NGa4JbNYSZYsTnLGrqe9Kn/lCkA4ybXt8sx5ojDqZjr2i0TWAHxx/vhgfjX+i3hCdKWufxYwi7CfXqtITSA==}
     engines: {node: '>= 10'}
+
+  '@netlify/plugin-nextjs@5.11.2':
+    resolution: {integrity: sha512-9Hgd/J5nP2U/Vv0teytq9uUAGppiKV9t5tzpsuMLqeqUGD9STxXwKmyZd2v8Z4THSW9rw4+8w7dH7LVlFoym2A==}
+    engines: {node: '>=18.0.0'}
 
   '@next/env@15.2.4':
     resolution: {integrity: sha512-+SFtMgoiYP3WoSswuNmxJOCwi06TdWE733D+WPjpXIe4LXGULwEaofiiAy6kbS0+XjM5xF5n3lKuBwN2SnqD9g==}
@@ -2372,6 +2379,8 @@ snapshots:
       '@napi-rs/canvas-linux-x64-musl': 0.1.70
       '@napi-rs/canvas-win32-x64-msvc': 0.1.70
     optional: true
+
+  '@netlify/plugin-nextjs@5.11.2': {}
 
   '@next/env@15.2.4': {}
 

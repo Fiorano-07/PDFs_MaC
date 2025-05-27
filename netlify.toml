@@ -1,0 +1,16 @@
+[build]
+command = "pnpm build"
+publish = ".next"
+
+[[plugins]]
+package = "@netlify/plugin-nextjs"
+
+[build.environment]
+NEXT_USE_NETLIFY_EDGE = "true"
+NEXT_FORCE_EDGE_IMAGES = "true"
+
+# Uncomment if you need to handle redirects
+# [[redirects]]
+# from = "/*"
+# to = "/index.html"
+# status = 200 

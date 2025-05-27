@@ -74,6 +74,59 @@ PDFs_MaC/
 
 The application uses Supabase as its backend. The database schema can be found in `db_schema.sql`.
 
+## Deployment on Netlify
+
+Follow these steps to deploy the application on Netlify:
+
+1. **Prepare Your Repository**
+   - Ensure your code is pushed to a GitHub repository
+   - Your repository should have an up-to-date `package.json` and `next.config.js`
+
+2. **Configure Build Settings**
+   - Build command: `pnpm build`
+   - Publish directory: `.next`
+   - Node version: 18 (or your preferred version)
+
+3. **Set Up Environment Variables**
+   In your Netlify project settings, add the following environment variables:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. **Add Netlify Configuration**
+   Create a `netlify.toml` file in your project root:
+   ```toml
+   [build]
+   command = "pnpm build"
+   publish = ".next"
+
+   [[plugins]]
+   package = "@netlify/plugin-nextjs"
+
+   [build.environment]
+   NEXT_USE_NETLIFY_EDGE = "true"
+   NEXT_FORCE_EDGE_IMAGES = "true"
+   ```
+
+5. **Deploy Steps**
+   - Log in to your Netlify account
+   - Click "Add new site" → "Import an existing project"
+   - Connect to your GitHub repository
+   - Configure the build settings as mentioned above
+   - Click "Deploy site"
+
+6. **Post-Deployment**
+   - Set up your custom domain (if needed)
+   - Enable HTTPS
+   - Configure any additional build hooks or deploy settings
+
+Note: Make sure to install the Netlify CLI for local testing:
+```bash
+pnpm add -g netlify-cli
+netlify dev # For local testing
+```
+
 ## Contributing
 
 1. Fork the repository
