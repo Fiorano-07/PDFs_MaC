@@ -30,12 +30,7 @@ const mockComments = [
   },
 ]
 
-interface SharedPDFPageProps {
-  params: { token: string };
-  // searchParams?: { [key: string]: string | string[] | undefined }; // Optional: if you ever use searchParams
-}
-
-export default function SharedPDFPage({ params }: SharedPDFPageProps) {
+export default function SharedPDFPage({ params }: { params: { token: string } }) {
   const [comments, setComments] = useState(mockComments)
   const [newComment, setNewComment] = useState("")
   const [guestName, setGuestName] = useState("")
