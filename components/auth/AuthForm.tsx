@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-// import { useToast } from '@/components/ui/use-toast' // Temporarily comment out
+import { useToast } from '@/components/ui/use-toast'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClientComponentClient, SupabaseClient } from '@supabase/auth-helpers-nextjs'
 
@@ -14,7 +14,7 @@ interface AuthFormProps {
 
 export function AuthForm({ mode }: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
-  // const { toast } = useToast() // Temporarily comment out
+  const { toast } = useToast()
   const router = useRouter()
   const [redirectTo, setRedirectTo] = useState('/dashboard')
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null)
@@ -27,67 +27,127 @@ export function AuthForm({ mode }: AuthFormProps) {
     if (redirectParam) {
       setRedirectTo(redirectParam)
     }
-    // TEMPORARILY COMMENTED OUT FOR TESTING
-    /*
-    const checkSession = async () => {
-      if (!client) return;
-      const { data: { session } } = await client.auth.getSession()
-      if (session) {
-        console.log('Existing session found, redirecting...')
-        router.push(redirectParam || '/dashboard')
-      }
-    }
-    checkSession()
-    */
-  }, [router, searchParams])
+  }, [searchParams])
 
-  const verifySession = async (maxAttempts = 5, delayMs = 1000): Promise<boolean> => {
-    if (!supabase) return false;
+  const verifySession = async (maxAttempts = 3, delayMs = 500): Promise<boolean> => {
+    if (!supabase) {
+      toast({
+        title: 'Session Verification Failed',
+        description: 'Unable to verify session: client not initialized',
+        variant: 'destructive'
+      })
+      return false;
+    }
     for (let i = 0; i < maxAttempts; i++) {
-      console.log(`Attempt ${i + 1} to verify session...`)
-      const { data: { session }, error } = await supabase.auth.getSession()
+      const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        console.log('Session found:', { 
-          user: session.user.email,
-          expires_at: new Date(session.expires_at! * 1000).toISOString()
+        toast({
+          title: 'Session Verified',
+          description: 'Your session is active and verified',
+          variant: 'default'
         })
         return true
       }
-      if (error) {
-        console.error(`Attempt ${i + 1} session verification error:`, error)
-      }
       if (i < maxAttempts - 1) {
-        console.log(`No session found on attempt ${i + 1}, waiting ${delayMs}ms...`)
+        toast({
+          title: 'Verifying Session',
+          description: `Attempt ${i + 1} of ${maxAttempts}...`,
+          duration: delayMs
+        })
         await new Promise(resolve => setTimeout(resolve, delayMs))
       }
     }
+    toast({
+      title: 'Session Verification Failed',
+      description: 'Unable to verify your session after multiple attempts',
+      variant: 'destructive'
+    })
     return false
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!supabase) {
-      // toast({ title: 'Error', description: 'Supabase client not initialized.', variant: 'destructive' }) // Temporarily comment out
-      console.error('Supabase client not initialized.')
+      toast({ title: 'Error', description: 'Supabase client not initialized.', variant: 'destructive' })
       return
     }
     setIsLoading(true)
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      })
-      if (error) throw error
-      if (!data?.session) throw new Error('No session returned from Supabase')
-      const sessionEstablished = await verifySession()
-      if (!sessionEstablished) throw new Error('Failed to establish session. Please try signing in again.')
-      // toast({ title: 'Success!', description: 'Successfully signed in' }) // Temporarily comment out
-      console.log('Successfully signed in')
-      router.push(redirectTo)
-      router.refresh()
+      if (mode === 'signup') {
+        const { data, error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: { full_name: formData.name },
+          },
+        });
+        if (error) throw error;
+        if (data.user) { 
+          toast({ 
+            title: 'Account created!', 
+            description: 'Please check your email to verify your account.',
+            duration: 5000
+          });
+          setTimeout(() => {
+            router.push('/auth/signin'); 
+          }, 3000);
+        } else {
+          toast({ title: 'Notice', description: 'Sign-up process initiated. If no email arrives, please try again or contact support.', variant: 'default' });
+        }
+      } else { // Sign-in logic
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        })
+        if (error) throw error;
+        if (!data?.session) throw new Error('No session returned from Supabase after signInWithPassword')
+        console.log('Sign-in successful, redirecting to:', redirectTo)
+        toast({ title: 'Success!', description: 'Successfully signed in' })
+        router.push(redirectTo) 
+      }
     } catch (error) {
-      console.error('Auth error:', error)
-      // toast({ title: 'Error', description: error instanceof Error ? error.message : 'An error occurred', variant: 'destructive' }) // Temporarily comment out
+      console.error('Auth error (raw):', error)
+      let title = 'Error'
+      let description = 'An unexpected error occurred. Please try again.'
+
+      if (typeof error === 'object' && error !== null && 'message' in error && typeof (error as any).message === 'string') {
+        const errorMessage = (error as any).message;
+        description = errorMessage; 
+        if (mode === 'signup') {
+          if (errorMessage.includes('User already registered')) {
+            title = 'Sign-up Failed'
+            description = 'This email address is already registered. Please try signing in or use a different email.'
+          } else if (errorMessage.includes('Password should be at least 6 characters')) {
+            title = 'Weak Password'
+            description = 'Your password must be at least 6 characters long.'
+          } else if (errorMessage.toLowerCase().includes('unable to validate email address')) {
+            title = 'Invalid Email'
+            description = 'Please enter a valid email address.'
+          } else {
+            title = 'Sign-up Failed' 
+          }
+        } else { 
+          if (errorMessage.includes('Invalid login credentials')) {
+            title = 'Sign-in Failed'
+            description = 'Invalid email or password. Please check your credentials and try again.'
+          } else if (errorMessage.includes('Email not confirmed')) {
+            title = 'Email Not Verified'
+            description = 'Please verify your email address before signing in. Check your inbox for a confirmation link.'
+          } else {
+            title = 'Sign-in Failed' 
+          }
+        }
+      } else if (error instanceof Error) { 
+        description = error.message;
+      } else if (typeof error === 'string') {
+        description = error;
+      }
+
+      toast({ 
+        title: title, 
+        description: description, 
+        variant: 'destructive' 
+      })
     } finally {
       setIsLoading(false)
     }
@@ -96,18 +156,15 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    name: '', // Only used for signup
+    name: '', 
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }))
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
   if (!supabase) {
-    return <div>Loading...</div>;
+    return <div>Loading form...</div>; 
   }
 
   return (
