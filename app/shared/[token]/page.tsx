@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -30,11 +30,20 @@ const mockComments = [
   },
 ]
 
-export default function SharedPDFPage({ params }: { params: { token: string } }) {
+export default function SharedPDFPage({ params }: { params: Promise<{ token: string }> }) {
   const [comments, setComments] = useState(mockComments)
   const [newComment, setNewComment] = useState("")
   const [guestName, setGuestName] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+  const [token, setToken] = useState<string>("")
+
+  useEffect(() => {
+    const getParams = async () => {
+      const resolvedParams = await params
+      setToken(resolvedParams.token)
+    }
+    getParams()
+  }, [params])
 
   const handleAddComment = () => {
     if (newComment.trim() && guestName.trim()) {
@@ -125,6 +134,11 @@ export default function SharedPDFPage({ params }: { params: { token: string } })
                         <p className="text-sm text-gray-400 mt-2">
                           This is a shared document accessible via invite link
                         </p>
+                        {token && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            Token: {token}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>

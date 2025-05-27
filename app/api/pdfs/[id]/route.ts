@@ -1,13 +1,16 @@
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { cookies } from 'next/headers'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params
+    
     const { data: pdf, error } = await supabaseAdmin
       .from('pdf_files')
       .select(`
@@ -22,7 +25,7 @@ export async function GET(
         created_at,
         updated_at
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (error) {
@@ -43,10 +46,12 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params
+    
     const supabase = createServerComponentClient({ cookies })
     const { data: { session } } = await supabase.auth.getSession()
     
@@ -65,7 +70,7 @@ export async function PATCH(
     const { data: existingPdf, error: fetchError } = await supabaseAdmin
       .from('pdf_files')
       .select('owner_id')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (fetchError || !existingPdf) {
@@ -83,7 +88,7 @@ export async function PATCH(
         is_public,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -101,10 +106,12 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params
+    
     const supabase = createServerComponentClient({ cookies })
     const { data: { session } } = await supabase.auth.getSession()
     
@@ -121,7 +128,7 @@ export async function DELETE(
     const { data: pdf, error: fetchError } = await supabaseAdmin
       .from('pdf_files')
       .select('owner_id, file_path')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (fetchError || !pdf) {
@@ -146,7 +153,7 @@ export async function DELETE(
     const { error: dbError } = await supabaseAdmin
       .from('pdf_files')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (dbError) {
       return NextResponse.json({ error: dbError.message }, { status: 500 })
@@ -159,4 +166,4 @@ export async function DELETE(
       { status: 500 }
     )
   }
-} 
+}

@@ -6,7 +6,7 @@ const nextConfig = {
     return config
   },
   experimental: {
-    serverActions: true,
+    serverActions: {},
   },
   async headers() {
     return [
