@@ -8,9 +8,8 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "PDF Collaboration System",
-  description: "Manage and collaborate on PDF documents",
-    generator: 'PDF-Manage & Collab'
+  title: "PDF Manager",
+  description: "Upload, manage and share your PDFs securely",
 }
 
 export default function RootLayout({
@@ -19,9 +18,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <ThemeProvider 
+          attribute="class" 
+          defaultTheme="dark" 
+          enableSystem={false} 
+          disableTransitionOnChange
+          storageKey="pdf-theme"
+        >
           {children}
           <Toaster />
         </ThemeProvider>

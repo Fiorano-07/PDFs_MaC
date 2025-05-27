@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -35,37 +35,90 @@ export default function DashboardPage() {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null)
+  const [user, setUser] = useState<{ email: string; name: string | null } | null>(null)
   const supabase = createClientComponentClient()
   const router = useRouter()
   const { toast } = useToast()
 
-  // Fetch files when component mounts
-  useEffect(() => {
-    fetchFiles()
-  }, [])
-
   const fetchFiles = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: filesData, error: filesError } = await supabase
         .from('files')
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (error) {
-        throw error
-      }
-
-      setFiles(data || [])
+      if (filesError) throw filesError
+      setFiles(filesData || [])
     } catch (error) {
       console.error('Error fetching files:', error)
       toast({
         title: "Error",
-        description: "Failed to load your files",
+        description: "Failed to load files",
         variant: "destructive",
       })
-    } finally {
-      setIsLoading(false)
     }
+  }
+
+  // Fetch user data and files when component mounts
+  useEffect(() => {
+    const fetchUserAndFiles = async () => {
+      try {
+        // Fetch user data
+        const { data: { user: userData }, error: userError } = await supabase.auth.getUser()
+        if (userError) throw userError
+
+        if (userData) {
+          // Try to get user profile from users table
+          const { data: profile, error: profileError } = await supabase
+            .from('users')
+            .select('name, email')
+            .eq('id', userData.id)
+            .single()
+
+          // If profile doesn't exist or there's an error, use data from auth.users
+          if (profileError || !profile) {
+            setUser({
+              email: userData.email || '',
+              name: userData.user_metadata?.full_name || null
+            })
+          } else {
+            setUser({
+              email: profile.email,
+              name: profile.name
+            })
+          }
+        }
+
+        await fetchFiles()
+      } catch (error) {
+        console.error('Error fetching data:', error)
+        toast({
+          title: "Error",
+          description: "Failed to load user data",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchUserAndFiles()
+  }, [supabase, toast])
+
+  const handleUploadComplete = useCallback(async () => {
+    setIsLoading(true)
+    await fetchFiles()
+    setIsLoading(false)
+  }, [])
+
+  const getInitials = (name: string | null) => {
+    if (!name) return "U"
+    return name
+      .split(" ")
+      .map(word => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
   }
 
   const handleShare = (file: FileItem) => {
@@ -152,19 +205,25 @@ export default function DashboardPage() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full border border-gray-800 hover:bg-gray-900">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="/placeholder-user.jpg" alt="User" />
-                      <AvatarFallback className="bg-gray-900 text-white">U</AvatarFallback>
+                      <AvatarImage src="/placeholder-user.jpg" alt={user?.name || "User"} />
+                      <AvatarFallback className="bg-gray-900 text-white">
+                        {getInitials(user?.name || null)}
+                      </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 bg-gray-900 border border-gray-800" align="end" forceMount>
+                  <div className="flex flex-col space-y-1 p-2">
+                    <p className="text-sm font-medium text-white">{user?.name}</p>
+                    <p className="text-xs text-gray-400">{user?.email}</p>
+                  </div>
                   <DropdownMenuItem onClick={() => router.push('/profile')} className="text-white hover:bg-gray-800">
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut} className="text-white hover:bg-gray-800">
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                    <span>Sign out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -303,7 +362,8 @@ export default function DashboardPage() {
       {/* Dialogs */}
       <FileUploadDialog 
         open={uploadDialogOpen} 
-        onOpenChange={setUploadDialogOpen} 
+        onOpenChange={setUploadDialogOpen}
+        onUploadComplete={handleUploadComplete}
       />
       {selectedFile && (
         <ShareDialog

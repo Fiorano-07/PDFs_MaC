@@ -13,9 +13,10 @@ import { useRouter } from "next/navigation"
 interface FileUploadDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onUploadComplete?: () => Promise<void>
 }
 
-export function FileUploadDialog({ open, onOpenChange }: FileUploadDialogProps) {
+export function FileUploadDialog({ open, onOpenChange, onUploadComplete }: FileUploadDialogProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -104,8 +105,10 @@ export function FileUploadDialog({ open, onOpenChange }: FileUploadDialogProps) 
         description: "PDF uploaded successfully!",
       })
 
-      // Refresh the dashboard to show the new file
-      router.refresh()
+      // Call the onUploadComplete callback if provided
+      if (onUploadComplete) {
+        await onUploadComplete()
+      }
       
       // Close the dialog
       setSelectedFile(null)
